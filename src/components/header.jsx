@@ -1,4 +1,5 @@
 import React from "react";
+import { useState,useReducer } from "react";
 import {
   Typography,
   Icon,
@@ -9,8 +10,17 @@ import {
   Button,
 } from "@mui/material";
 import { Cloud, ThreeDRotation, Search, MyLocation } from "@mui/icons-material";
+import {currentWeatherReducer} from '../reducers/fetchweather/reducer';
+import {Fetchweather} from '../services/fetchweather'
 
 function Header() {
+
+  const [credentails,setCredentials] = useState({email:'',password : ''});
+  const[state,dispatch] = useReducer(currentWeatherReducer,{user:null,loading:false,error:null});//usereducer needs reducer and state varibles
+  const fetchCurrentLocation =(e)=>{
+    e.preventDefault();
+    Fetchweather(dispatch)(credentails);
+  }
   return (
     <Box
       sx={{
@@ -57,7 +67,7 @@ function Header() {
         ></TextField>
       </Box>
       <Box>
-        <Button variant="outlined" sx={{ border:"1px solid black",boxShadow : "", background : "rgb(37, 40, 42)", borderRadius : "6px" }}>
+        <Button variant="outlined" sx={{ border:"1px solid black",boxShadow : "", background : "rgb(37, 40, 42)", borderRadius : "6px" }} onClick={fetchCurrentLocation}>
           <Box sx={{ display: "flex", flexDirection: "row" ,color : "white"}}>
             <MyLocation sx ={{marginRight : "6px",fontSize : "18px"}} />
             <Typography fontSize={"13px"}>Current Location</Typography>

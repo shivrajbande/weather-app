@@ -1,0 +1,6 @@
+export const ACTIONS = {
+    DATA_REQUEST : 'DATA_REQUEST',
+    DATA_ERROR : 'DATA_ERROR',
+    DATA_SUCCESS : 'DATA_SUCCESS'
+
+};
