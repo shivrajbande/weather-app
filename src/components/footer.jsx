@@ -16,7 +16,7 @@ export default function Footer() {
         }}
       >
         <Box sx={{ flex: 1, marginRight: "10px" }}>
-          <Typography variant="h5" sx={{marginBottom : "15px"}}>Weather-India</Typography>
+          <Typography variant="h5" sx={{marginBottom : "15px"}}>Weather-Info</Typography>
           <Typography variant="body2">
             Receive personalized weather reports based on your current location
             or any other city you choose.

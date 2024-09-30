@@ -132,7 +132,7 @@ function Header() {
       >
         <Cloud sx={{ fontSize: "30px" }} />
         <Typography variant="h6" marginLeft={"10px"}>
-          Weather-India
+          Weather-Info
         </Typography>
       </Box>
       <Box>
