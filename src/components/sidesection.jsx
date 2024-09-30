@@ -52,32 +52,77 @@ export default function SideSection() {
   const currentDate = formatDate(new Date());
 
   const { list } = forcastDataList;
-  const forCastModel = list.map((dayForcast) => {
-    const {
-      dt,
-      temp: { day },
-      weather: [{ description }],
-    } = dayForcast;
 
-
-
-    const date = new Date(dt * 1000);
-
-    const dayString = date.getUTCDate();
-    const month = date.toLocaleString("en-US", { month: "short" });
-
-    const formattedDate = `${dayString} ${month}`;
-
-    return {
-      temperature: day,
-      date: formattedDate,
-      weatherType: description,
-    };
-  });
+  // Function to convert UNIX timestamp to a date string
+  const getDateString = (timestamp) => {
+    const date = new Date(timestamp * 1000);
+    return date.toISOString().split("T")[0]; // Returns YYYY-MM-DD format
+  };
 
   const kelvinToCelsius = (kelvin) => (kelvin - 273.15).toFixed(2);
   const currentTemp = kelvinToCelsius(temp);
 
+  // Function to aggregate hourly data into daily forecasts
+  const getDailyForecast = (data) => {
+    const dailyForecast = {};
+
+    data.forEach((entry) => {
+      const date = getDateString(entry.dt);
+
+      if (!dailyForecast[date]) {
+        dailyForecast[date] = {
+          temp: [],
+          humidity: [],
+          pressure: [],
+          weather: entry.weather[0], // Take the first weather condition
+          rain: entry.rain ? entry.rain["3h"] : 0, // Handle rain if exists
+        };
+      }
+
+      // Push temperature and humidity for averaging later
+      dailyForecast[date].temp.push(entry.main.temp);
+      dailyForecast[date].humidity.push(entry.main.humidity);
+      dailyForecast[date].pressure.push(entry.main.pressure);
+
+      // Aggregate rain if applicable
+      if (entry.rain) {
+        dailyForecast[date].rain += entry.rain["3h"];
+      }
+    });
+
+    // Convert aggregated data into an array format
+    return Object.keys(dailyForecast).map((date) => {
+      const { temp, humidity, pressure, weather, rain } = dailyForecast[date];
+
+      return {
+        date: formatDate(date),
+        avgTemp: kelvinToCelsius(
+          (temp.reduce((a, b) => a + b, 0) / temp.length).toFixed(2)
+        ),
+        avgHumidity: (
+          humidity.reduce((a, b) => a + b, 0) / humidity.length
+        ).toFixed(2),
+        avgPressure: (
+          pressure.reduce((a, b) => a + b, 0) / pressure.length
+        ).toFixed(2),
+        weather,
+        totalRain: rain,
+      };
+    });
+  };
+
+  // Usage
+  const dailyForecasts = getDailyForecast(list);
+
+  function formatDate(dateString) {
+    const date = new Date(dateString); // Create a Date object from the string
+
+    // Options for formatting
+    const options = { month: "short", day: "numeric", year: "numeric" };
+
+    // Format the date using toLocaleDateString
+    return date.toLocaleDateString("en-US", options);
+  }
   return (
     <Box
       sx={{
@@ -189,21 +234,23 @@ export default function SideSection() {
             background: "rgb(241, 241, 241)",
           }}
         >
-          {forCastModel.map((item, index) => (
-            <Box
-              key={index}
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                color: "black",
-              }}
-            >
-              <Typography>{item.temperature}</Typography>
-              <Typography>{item.date}</Typography>
-              <Typography>{item.weatherType}</Typography>
-            </Box>
-          ))}
+          {dailyForecasts.map((item, index) => {
+            return (
+              <Box
+                key={index}
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  color: "black",
+                }}
+              >
+                <Typography>{item.avgTemp}</Typography>
+                <Typography>{item.date}</Typography>
+                <Typography>{item.weather.main}</Typography>
+              </Box>
+            );
+          })}
         </Box>
       </Box>
     </Box>

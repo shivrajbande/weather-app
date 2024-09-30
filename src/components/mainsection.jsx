@@ -21,6 +21,9 @@ function MainSection() {
   const { data, error, loading } = useSelector((state) => state.currentWeather);
   const { airQualityData } = useSelector((state) => state.airQuality);
 
+
+  console.log(data);
+
   // if (!data.main || !airQualityData.list) {
   //   return <div>Loading...</div>;  // Placeholder when data is not available
   // }

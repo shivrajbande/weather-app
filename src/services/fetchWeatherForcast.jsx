@@ -4,12 +4,12 @@ export const FetchWeatherForcast =
   (dispatch) => async (latitude, longitude) => {
     dispatch({ type: FORCAST_WEATHER_ACTIONS.FORCAST_WEATHER_REQUEST });
     try {
-      const response = await fetch(
-        `api.openweathermap.org/data/2.5/forecast/daily?lat=${latitude}&lon=${longitude}&cnt=5&appid=${process.env.api_key}`,
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${process.env.REACT_APP_API_KEY}`,
         {
           method: "GET",
         }
       );
+
 
       if (response.status === 200) {
         const data = await response.json();

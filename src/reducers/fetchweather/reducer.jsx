@@ -50,12 +50,13 @@ const fetchingState = {
 };
 
 export function currentWeatherReducer(state = fetchingState, action) {
+  console.log("action is ",action.type);
   switch (action.type) {
-    case CURRENT_WEATHER_ACTIONS.DATA_REQUEST:
+    case CURRENT_WEATHER_ACTIONS.CURRENT_WEATHER_REQUEST:
       return { ...state, loading: true, error: null };
-    case CURRENT_WEATHER_ACTIONS.DATA_ERROR:
+    case CURRENT_WEATHER_ACTIONS.CURRENT_WEATHER_ERROR:
       return { ...state, loading: false, error: action.payload };
-    case CURRENT_WEATHER_ACTIONS.DATA_SUCCESS:
+    case CURRENT_WEATHER_ACTIONS.CURRENT_WEATHER_SUCCESS:
       return { ...state, loading: false, data: action.payload, error: null };
     default:
       return { ...state };
