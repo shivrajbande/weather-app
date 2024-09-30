@@ -13,11 +13,11 @@ export const AirQualityModel = [
     content: "0.45gm/m3",
   },
   {
-    chemicalType: "NO2",
-    content: "6.6gm/m3",
+    chemicalType: "pm2_5",
+    content: "94.41 ug/m3",
   },
   {
-    chemicalType: "O2",
+    chemicalType: "pm10",
     content: "94.41 ug/m3",
   },
 ];

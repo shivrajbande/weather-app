@@ -1,22 +1,20 @@
-import { ACTIONS } from "../reducers/fetchweather/action";
+import { CURRENT_WEATHER_ACTIONS, AIR_QUALITY_ACTIONS } from "../reducers/fetchweather/action";
 
-export const Fetchweather = (dispatch) => async (credentials) => {
-  dispatch({ type: ACTIONS.DATA_REQUEST });
+export const FetchCurrerntWeather = (dispatch) => async (latitude, longitude) => {
+  dispatch({ type: CURRENT_WEATHER_ACTIONS.CURRENT_WEATHER_REQUEST });
   try {
-    const response = await fetch("https://job-notification-backend.onrender.com/api/DATA", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(credentials),
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=04c5c94ad19e7f079b59a54e33223f5e`, {
+      method: "GET",
     });
 
-    if (response.ok) {
+    if (response.status === 200) {
       const data = await response.json();
-      dispatch({ type: ACTIONS.DATA_SUCCESS, payload: data });
+      dispatch({ type: CURRENT_WEATHER_ACTIONS.CURRENT_WEATHER_SUCCESS, payload: data });
     } else {
       const error = await response.text();
-      dispatch({ type: ACTIONS.DATA_ERROR, payload: error });
+      dispatch({ type: CURRENT_WEATHER_ACTIONS.CURRENT_WEATHER_ERROR, payload: error });
     }
   } catch (error) {
-    dispatch({ type: ACTIONS.DATA_ERROR, payload: error.message });
+    dispatch({ type: CURRENT_WEATHER_ACTIONS.CURRENT_WEATHER_ERROR, payload: error.message });
   }
 };

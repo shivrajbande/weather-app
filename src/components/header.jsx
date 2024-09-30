@@ -1,26 +1,77 @@
-import React from "react";
-import { useState,useReducer } from "react";
+import React, { useEffect, useState, } from "react";
 import {
   Typography,
   Icon,
   Box,
   TextField,
-  Container,
   InputAdornment,
   Button,
 } from "@mui/material";
-import { Cloud, ThreeDRotation, Search, MyLocation } from "@mui/icons-material";
-import {currentWeatherReducer} from '../reducers/fetchweather/reducer';
-import {Fetchweather} from '../services/fetchweather'
+import { useDispatch,useSelector } from "react-redux";
+import { Cloud, Search, MyLocation } from "@mui/icons-material";
+import { currentWeatherReducer } from "../reducers/fetchweather/reducer";
+import { FetchCurrerntWeather } from "../services/fetchweather";
+import { FetchAirQuality } from "../services/fetchAirQuality";
+import { FetchWeatherForcast } from "../services/fetchWeatherForcast";
 
 function Header() {
-
-  const [credentails,setCredentials] = useState({email:'',password : ''});
-  const[state,dispatch] = useReducer(currentWeatherReducer,{user:null,loading:false,error:null});//usereducer needs reducer and state varibles
-  const fetchCurrentLocation =(e)=>{
+  const [location, setLocation] = useState(null);
+  const [permissionStatus, setPermissionStatus] = useState("");
+  const dispatch = useDispatch();
+  const {data, laoding, error} = useSelector((state)=>state.currentWeather);
+  const fetchCurrentLocation = async (e) => {
     e.preventDefault();
-    Fetchweather(dispatch)(credentails);
-  }
+    await checkPermission(); // Ensure permission is checked before fetching weather
+    if (location) {
+      // Fetch weather only if location is available
+      FetchCurrerntWeather(dispatch)(location.latitude, location.longitude);
+      FetchAirQuality(dispatch)(location.latitude, location.longitude);
+      FetchWeatherForcast(dispatch)(location.latitude, location.longitude);
+    } else {
+      console.log("Location not available.");
+    }
+  };
+
+  // useEffect(() => {
+  //   checkPermission();
+  // }, []);
+
+  const checkPermission = async () => {
+    if (navigator.permissions) {
+      const result = await navigator.permissions.query({
+        name: "geolocation",
+      });
+      setPermissionStatus(result.state);
+      if (result.state === "prompt") {
+        requestLocation();
+      } else if (result.state === "denied") {
+        console.log("Geolocation permission denied.");
+      } else if (result.state === "granted") {
+        // If already granted, get the current position
+        requestLocation();
+      }
+    }
+  };
+
+  const requestLocation = () => {
+    navigator.geolocation.getCurrentPosition(success, errorFun);
+  };
+
+  const success = (position) => {
+    setLocation({
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude,
+    });
+    console.log(position.coords.latitude,position.coords.longitude);
+    
+    // Automatically fetch weather after getting location
+    FetchCurrerntWeather(dispatch)(position.coords.latitude, position.coords.longitude);
+  };
+
+  const errorFun = (err) => {
+    console.warn(`ERROR(${err.code}): ${err.message}`);
+  };
+
   return (
     <Box
       sx={{
@@ -29,47 +80,49 @@ function Header() {
         justifyContent: "space-between",
         alignItems: "center",
         height: "4%",
-        // background: "rgb(241, 241, 241)",
-        padding: "4px 10px 4px 10px",
-        borderRadius : "8px"
+        padding: "4px 10px",
+        borderRadius: "8px",
       }}
     >
-      <Box sx={{ display: "flex", flexDirection: "row",alignItems:"center" ,color: "rgb(37, 40, 42)"}}>
-        <Cloud sx={{  fontSize : "30px" }} />
-        <Typography variant="h6" marginLeft={"10px"}>Weather-India</Typography>
+      <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", color: "rgb(37, 40, 42)" }}>
+        <Cloud sx={{ fontSize: "30px" }} />
+        <Typography variant="h6" marginLeft={"10px"}>
+          Weather-India
+        </Typography>
       </Box>
       <Box>
         <TextField
-        size="small"
-        placeholder="Search..."
-        variant="outlined" 
-        color="red"
-        sx={{
-            width : "450px",
-            borderColor: 'green', // Set the border color
-            '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: 'grey', // Set the focused border color
-            },
-            '& .MuiInputBase-input': {
-              color: 'black', // Set the text color
-            },
-            borderRadius: '20px'
+          size="small"
+          placeholder="Location..."
+          variant="outlined"
+          sx={{
+            width: "450px",
+            borderRadius: "20px",
           }}
           slotProps={{
-            input: {
+            InputProps:{
               startAdornment: (
-                <InputAdornment>
+                <InputAdornment position="start">
                   <Search />
                 </InputAdornment>
               ),
-            },
+            }
+
           }}
-        ></TextField>
+        />
       </Box>
       <Box>
-        <Button variant="outlined" sx={{ border:"1px solid black",boxShadow : "", background : "rgb(37, 40, 42)", borderRadius : "6px" }} onClick={fetchCurrentLocation}>
-          <Box sx={{ display: "flex", flexDirection: "row" ,color : "white"}}>
-            <MyLocation sx ={{marginRight : "6px",fontSize : "18px"}} />
+        <Button
+          variant="outlined"
+          sx={{
+            border: "1px solid black",
+            background: "rgb(37, 40, 42)",
+            borderRadius: "6px",
+          }}
+          onClick={fetchCurrentLocation}
+        >
+          <Box sx={{ display: "flex", flexDirection: "row", color: "white" }}>
+            <MyLocation sx={{ marginRight: "6px", fontSize: "18px" }} />
             <Typography fontSize={"13px"}>Current Location</Typography>
           </Box>
         </Button>

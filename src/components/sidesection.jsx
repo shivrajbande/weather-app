@@ -3,6 +3,7 @@ import React from "react";
 import { useState } from "react";
 import { Cloud, WbSunny, CalendarMonth, LocationOn } from "@mui/icons-material";
 import ThunderstormIcon from "@mui/icons-material/Thunderstorm";
+import { useSelector } from "react-redux";
 // import WbSunnyIcon from '@mui/icons-material/WbSunny';
 
 const modelClass = [
@@ -32,12 +33,51 @@ const modelClass = [
     weatherType: "Broken clouds",
   },
 ];
+
+const formatDate = (date) => {
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "long", // Full name of the day (e.g., "Sunday")
+    month: "short", // Short form of the month (e.g., "Sep")
+    day: "numeric", // Numeric day (e.g., "11")
+  }).format(date);
+};
 export default function SideSection() {
-  const [currentState, setCurrentState] = useState(21.4);
-  const [raining, setRaining] = useState(false);
-  const [weatherType, setweatherType] = useState("rainy");
-  const [currentDate, setCurrentDate] = useState("Sunday, sep 11");
-  const [location, setLocation] = useState("Hyderabad");
+  const { data, error, loading } = useSelector((state) => state.currentWeather);
+  const { forcastDataList } = useSelector((state) => state.weatherForcast);
+  const {
+    name,
+    weather: [{ main }],
+    main: { temp, feels_like, humidity, pressure },
+  } = data;
+  const currentDate = formatDate(new Date());
+
+  const { list } = forcastDataList;
+  const forCastModel = list.map((dayForcast) => {
+    const {
+      dt,
+      temp: { day },
+      weather: [{ description }],
+    } = dayForcast;
+
+
+
+    const date = new Date(dt * 1000);
+
+    const dayString = date.getUTCDate();
+    const month = date.toLocaleString("en-US", { month: "short" });
+
+    const formattedDate = `${dayString} ${month}`;
+
+    return {
+      temperature: day,
+      date: formattedDate,
+      weatherType: description,
+    };
+  });
+
+  const kelvinToCelsius = (kelvin) => (kelvin - 273.15).toFixed(2);
+  const currentTemp = kelvinToCelsius(temp);
+
   return (
     <Box
       sx={{
@@ -65,37 +105,54 @@ export default function SideSection() {
             justifyContent: "space-between",
             alignItems: "center",
             height: "14%",
-            margin : "2px 0px 2px 0px"
+            margin: "2px 0px 2px 0px",
           }}
         >
-          <Typography variant="h4">{currentState}oC</Typography>
-          {raining ? (
-            <ThunderstormIcon sx ={{color  : "black"}} />
-          ) : (
-            <>
-              {currentState < 25 && (
-                <Cloud
-                  sx={{
-                    color: "black",
-                  }}
-                />
-              )}
-              {currentState > 25 && (
-                <WbSunny
-                  sx={{
-                    color: "black",
-                  }}
-                />
-              )}
-            </>
-          )}
+          <Typography variant="h4">{currentTemp}oC</Typography>
+          {
+            // raining ? (
+            //   <ThunderstormIcon sx={{ color: "black" }} />
+            // ) : (
+            //   <>
+            //     {currentState < 25 && (
+            //       <Cloud
+            //         sx={{
+            //           color: "black",
+            //         }}
+            //       />
+            //     )}
+            //     {currentState > 25 && (
+            //       <WbSunny
+            //         sx={{
+            //           color: "black",
+            //         }}
+            //       />
+            //     )}
+            //   </>
+            // )
+            main === "Clouds" ? (
+              <Cloud
+                sx={{
+                  color: "black",
+                }}
+              />
+            ) : "Rain" ? (
+              <WbSunny
+                sx={{
+                  color: "black",
+                }}
+              />
+            ) : (
+              <></>
+            )
+          }
         </Box>
         <Box
           sx={{
             display: "flex",
             flexDirection: "row",
             justifyContent: "start",
-            margin : "8px 0px 8px 0px"
+            margin: "8px 0px 8px 0px",
           }}
         >
           <CalendarMonth />
@@ -108,8 +165,7 @@ export default function SideSection() {
             justifyContent: "start",
           }}
         >
-          {" "}
-          <LocationOn /> <Typography>{location}</Typography>
+          <LocationOn /> <Typography>{name}</Typography>
         </Box>
       </Box>
       <Box sx={{ paddingTop: "10px", height: "40", background: "white" }}>
@@ -117,7 +173,7 @@ export default function SideSection() {
           variant="h6"
           sx={{
             fontWeight: "500",
-            marginTop : "30px"
+            marginTop: "30px",
           }}
         >
           Next 5 days forcast
@@ -133,7 +189,7 @@ export default function SideSection() {
             background: "rgb(241, 241, 241)",
           }}
         >
-          {modelClass.map((item, index) => (
+          {forCastModel.map((item, index) => (
             <Box
               key={index}
               sx={{
