@@ -1,9 +1,10 @@
+
 import { AIR_QUALITY_ACTIONS } from "../reducers/airQuality/actions";
 
 export const FetchAirQuality = (dispatch) => async (latitude, longitude) => {
   dispatch({ type: AIR_QUALITY_ACTIONS.AIR_QUALITY_REQUEST });
   try{
-    const response = await fetch(`http://api.openweathermap.org/data/2.5/air_pollution?lat=${latitude}&lon=${longitude}&appid=04c5c94ad19e7f079b59a54e33223f5e`, {
+    const response = await fetch(`http://api.openweathermap.org/data/2.5/air_pollution?lat=${latitude}&lon=${longitude}&appid=${process.env.api_key}`, {
       method: "GET",
     });
 

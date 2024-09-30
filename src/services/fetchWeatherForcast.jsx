@@ -5,7 +5,7 @@ export const FetchWeatherForcast =
     dispatch({ type: FORCAST_WEATHER_ACTIONS.FORCAST_WEATHER_REQUEST });
     try {
       const response = await fetch(
-        `api.openweathermap.org/data/2.5/forecast/daily?lat=${latitude}&lon=${longitude}&cnt=5&appid=04c5c94ad19e7f079b59a54e33223f5e`,
+        `api.openweathermap.org/data/2.5/forecast/daily?lat=${latitude}&lon=${longitude}&cnt=5&appid=${process.env.api_key}`,
         {
           method: "GET",
         }
